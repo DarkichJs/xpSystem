@@ -23,15 +23,4 @@ module.exports = (client) => {
     client.application.commands.set(commands, guild.id).catch((err) => console.log(err));
     client.guildConfigs = new Collection();
   });
-  cron.schedule('0 0 * * *', async () => {
-    const users = await User.find();
-    users.forEach(async (user) => {
-      user.messages = 0;
-      user.status = false;
-      await user.save();
-    });
-    console.log(chalk.green('All users messages have been reset.'));
-  }, {
-    timezone: "America/New_York"
-  });
 };

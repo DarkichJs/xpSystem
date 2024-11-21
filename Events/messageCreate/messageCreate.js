@@ -20,9 +20,6 @@ module.exports = async (client, message) => {
         });
     } else {
         user.messages += 1;
-        if (user.messages >= 200) {
-            user.status = true;
-        }
     }
 
     try {

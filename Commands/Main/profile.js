@@ -24,16 +24,17 @@ module.exports = {
       user_find = await User.create({
         userID: user.id,
         messages: 0,
-        status: false,
+        xp: 0,
+        lvl: 0,
       });
     }
-    const statusText = user_find.status ? 'protected' : 'not protected';
     const embed = new EmbedBuilder()
       .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1305439461949313035.webp?size=96'})
       .setDescription(`
         \`\`\`User: ${user.globalName}\`\`\` 
+        \`\`\`XP: ${user_find.xp}\`\`\`
+        \`\`\`Level: ${user_find.lvl}\`\`\`
         \`\`\`Messages: ${user_find.messages}/200\`\`\`
-        \`\`\`Status: ${statusText}\`\`\`
         `)
       .setColor("#303136")
     interaction.reply({ embeds: [embed] });
