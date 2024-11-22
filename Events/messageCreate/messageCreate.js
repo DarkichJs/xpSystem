@@ -45,6 +45,21 @@ module.exports = async (client, message) => {
                 sentMessage.delete().catch(console.error);
             }, 10000); 
         });
+
+        const roles = {
+            5: '1152817072414404688',
+            10: '1152817285803802684',
+            15: '1152817700184268850',
+            20: '1152817755649757256',
+            25: '1152817954631725076'
+        };
+
+        if (roles[user.lvl]) {
+            const role = message.guild.roles.cache.get(roles[user.lvl]);
+            if (role) {
+                message.member.roles.add(role).catch(console.error);
+            }
+        }
     }
 
     try {
