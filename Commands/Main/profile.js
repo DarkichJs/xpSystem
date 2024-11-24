@@ -38,7 +38,7 @@ module.exports = {
       const xpForNextLevel = getXpForNextLevel(level);
       const filledBars = Math.floor((xp / xpForNextLevel) * totalBars);
       const emptyBars = totalBars - filledBars;
-      return `${'█'.repeat(filledBars)}${'░'.repeat(emptyBars)}`;
+      return `${'■'.repeat(filledBars)}${'□'.repeat(emptyBars)}`;
     }
 
     const levelBar = generateLevelBar(user_find.xp, user_find.lvl);
@@ -50,7 +50,7 @@ module.exports = {
       .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1305439515518701599.webp?size=96'})
       .setDescription(`
         \`\`\`User: ${user.globalName}\`\`\` 
-        \`\`\`Messages: ${user_find.messages} -> ${messagesToNextLevel}\`\`\`
+        \`\`\`Messages: ${user_find.messages} -> Left: ${messagesToNextLevel}\`\`\`
         \`\`\`XP: ${user_find.xp}\`\`\`
         \`\`\`Level: ${user_find.lvl}\`\`\`
         \`\`\`${levelBar}\`\`\`
