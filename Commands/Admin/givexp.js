@@ -4,7 +4,7 @@ const User = require('../../Schema/user.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('givexp')
+    .setName('sgivexp')
     .setDescription('Give XP to a user')
     .addUserOption(option => 
       option.setName('user')

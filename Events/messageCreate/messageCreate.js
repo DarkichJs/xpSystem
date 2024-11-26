@@ -4,7 +4,6 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, ActionRowBu
 const os = require("os");
 const chalk = require("chalk");
 const osu = require('node-os-utils');
-const fetch = require('node-fetch');
 const User = require('../../Schema/user.js'); 
 
 module.exports = async (client, message) => {

@@ -4,7 +4,7 @@ const User = require('../../Schema/user.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('rank')
+    .setName('srank')
     .setDescription('Display your rank, XP, level, and progress bar')
     .addUserOption(option => 
       option.setName('user')
@@ -34,11 +34,11 @@ module.exports = {
     const levelBar = generateLevelBar(user.xp, user.lvl);
     const xpForNextLevel = getXpForNextLevel(user.lvl);
     const embed = new EmbedBuilder()
-      .setTitle(`Rank - ${targetUser.username}`)
+      .setAuthor({name: `Rank - ${targetUser.username}`, iconURL: 'https://cdn.discordapp.com/emojis/1251888558013284572.webp?size=96&animated=true'})  
       .setDescription(`
-        **Level:** ${user.lvl}
-        **XP:** ${user.xp}/${xpForNextLevel}
-        **Progress:** \`\`\`${levelBar}\`\`\`
+        **・Level:** ${user.lvl}
+        **・XP:** ${user.xp}/${xpForNextLevel}
+        **・Progress:** \`\`\`${levelBar}\`\`\`
       `)
       .setColor('#303136')
       .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }));

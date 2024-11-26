@@ -8,7 +8,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const User = require("../../Schema/user.js");
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("profile")
+    .setName("sprofile")
     .setDescription(`Profile`)
     .addUserOption((option) =>
       option.setName("user").setDescription(`User`).setRequired(false)
@@ -49,10 +49,10 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1305439515518701599.webp?size=96'})
       .setDescription(`
-        \`\`\`User: ${user.globalName}\`\`\` 
-        \`\`\`Messages: ${user_find.messages} -> Left: ${messagesToNextLevel}\`\`\`
-        \`\`\`XP: ${user_find.xp}\`\`\`
-        \`\`\`Level: ${user_find.lvl}\`\`\`
+        \`\`\`・User: ${user.globalName}\`\`\` 
+        \`\`\`・Messages: ${user_find.messages} -> Left: ${messagesToNextLevel}\`\`\`
+        \`\`\`・XP: ${user_find.xp}\`\`\`
+        \`\`\`・Level: ${user_find.lvl}\`\`\`
         \`\`\`${levelBar}\`\`\`
         `)
       .setColor("#303136")
