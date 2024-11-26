@@ -9,6 +9,16 @@ const User = require('../../Schema/user.js');
 module.exports = async (client, message) => {
     if (message.author.bot) return; 
 
+    const excludedChannels = [
+        '1297531012233953300',
+        '1297548077195984906',
+        '1304325987894562836',
+        '1297869789498310748',
+        '1297585983478562928'
+    ];
+
+    if (excludedChannels.includes(message.channel.id)) return;
+
     let user = await User.findOne({ userID: message.author.id });
 
     if (!user) {
