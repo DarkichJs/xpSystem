@@ -49,7 +49,6 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1305439515518701599.webp?size=96'})
       .setDescription(`
-        \`\`\`・User: ${user.globalName}\`\`\` 
         \`\`\`・Messages: ${user_find.messages} -> Left: ${messagesToNextLevel}\`\`\`
         \`\`\`・XP: ${user_find.xp}\`\`\`
         \`\`\`・Level: ${user_find.lvl}\`\`\`
