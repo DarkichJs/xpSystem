@@ -8,8 +8,8 @@ module.exports = {
     .setDescription('Display the leaderboard'),
 
   async execute(interaction) {
-    let category = 'xp'; // Default category
-    let page = 1; // Default page
+    let category = 'xp'; 
+    let page = 1; 
     const itemsPerPage = 10;
 
     const categories = {
@@ -29,15 +29,12 @@ module.exports = {
         .setTitle(`Leaderboard - ${categories[category]}`)
         .setColor('#303136');
 
-      // Generate the leaderboard description
       const description = users.map((user, index) => {
         const position = index + 1 + (page - 1) * itemsPerPage;
         try {
-          // Fetch the Discord user and mention them
           const discordUser = interaction.client.users.cache.get(user.userID) || `<@${user.userID}>`;
           return `${position}. ${discordUser} - **${categories[category]}**: ${user[sortField]}`;
         } catch {
-          // Fallback for unknown users
           return `${position}. Unknown User (${user.userID}) - **${categories[category]}**: ${user[sortField]}`;
         }
       }).join('\n');
@@ -91,14 +88,14 @@ module.exports = {
         page += 1;
       } else if (i.customId === 'category_select') {
         category = i.values[0];
-        page = 1; // Reset to the first page when the category changes
+        page = 1;
       }
       await i.deferUpdate();
       await updateLeaderboard();
     });
 
     collector.on('end', async () => {
-      await interaction.editReply({ components: [] }); // Disable components when the collector ends
+      await interaction.editReply({ components: [] }); 
     });
   }
 };

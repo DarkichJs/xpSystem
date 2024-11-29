@@ -1,0 +1,7 @@
+{
+    token: "",
+    mongo: "",
+    excludedChannels: [],
+    roles: [],
+    adminIds
+}
