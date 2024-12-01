@@ -35,9 +35,9 @@ module.exports = async (client, message) => {
     }
 
     function getXpForNextLevel(level) {
-        return 35 + (level * 15); 
+        return 50 * level + 50; 
     }
-
+    
     user.xp = (user.xp || 0) + 7; 
 
     let xpForNextLevel = getXpForNextLevel(user.lvl);

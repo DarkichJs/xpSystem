@@ -30,8 +30,9 @@ module.exports = {
     }
 
     function getXpForNextLevel(level) {
-        return 35 + (level * 15); 
-    }
+      return 50 * level + 50; 
+  }
+  
 
     function generateLevelBar(xp, level) {
       const totalBars = 20;
