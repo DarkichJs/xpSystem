@@ -5,19 +5,12 @@ const os = require("os");
 const chalk = require("chalk");
 const osu = require('node-os-utils');
 const User = require('../../Schema/user.js'); 
+const config = require('../../config.json');
 
 module.exports = async (client, message) => {
     if (message.author.bot) return; 
 
-    const excludedChannels = [
-        '1297531012233953300',
-        '1297548077195984906',
-        '1304325987894562836',
-        '1297869789498310748',
-        '1297585983478562928',
-        '1307890048347279461',
-        '1300530265403297914'
-    ];
+    const excludedChannels = config.excludedChannels;
 
     if (excludedChannels.includes(message.channel.id)) return;
 
@@ -38,7 +31,7 @@ module.exports = async (client, message) => {
         return 50 * level + 50; 
     }
     
-    user.xp = (user.xp || 0) + 2; 
+    user.xp = (user.xp || 0) + config.xpPerMessage;
 
     let xpForNextLevel = getXpForNextLevel(user.lvl);
     while (user.xp >= xpForNextLevel) {
@@ -57,13 +50,7 @@ module.exports = async (client, message) => {
             }, 10000); 
         });
 
-        const roles = {
-            5: '1152817072414404688',
-            10: '1152817285803802684',
-            15: '1152817700184268850',
-            20: '1152817755649757256',
-            25: '1152817954631725076'
-        };
+        const roles = config.roles;
 
         if (roles[user.lvl]) {
             const role = message.guild.roles.cache.get(roles[user.lvl]);

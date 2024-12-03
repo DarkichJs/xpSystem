@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const User = require('../../Schema/user.js');
+const config = require('../../config.json'); // Import config
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
-    const adminIds = ['356238807156391936', '479889258623139851'];
+    const adminIds = config.adminIds;
     if (!adminIds.includes(interaction.user.id)) {
       return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
     }

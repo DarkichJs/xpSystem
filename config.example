@@ -3,5 +3,5 @@
     mongo: "",
     excludedChannels: [],
     roles: [],
-    adminIds
+    adminIds: []
 }
