@@ -1,12 +1,18 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const User = require('../../Schema/user.js');
 const config = require('../../config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sync')
-    .setDescription('Sync message counts, XP, levels, and roles for all users'),
+    .setDescription('Sync message counts, XP, levels, and roles for all users')
+    .addStringOption(option =>
+      option
+        .setName('channelid')
+        .setDescription('ID of the channel to sync messages from')
+        .setRequired(false)
+    ),
 
   async execute(interaction) {
     const adminIds = ['479889258623139851'];
@@ -18,17 +24,20 @@ module.exports = {
 
     const guild = interaction.guild;
     const messageCounts = {};
-    const mainChannelId = '1285418762564010035';
-    const channel = guild.channels.cache.get(mainChannelId);
+    const channelId = interaction.options.getString('channelid');
+    const channel = guild.channels.cache.get(channelId);
 
     if (!channel) {
-      return interaction.editReply({ content: 'Main chat channel not found.' });
+      return interaction.editReply({ content: 'Specified channel not found.' });
     }
 
     const botMember = guild.members.me;
-    if (!botMember || !channel.permissionsFor(botMember).has(['ViewChannel', 'ReadMessageHistory'])) {
+    if (!botMember || !channel.permissionsFor(botMember).has([
+      PermissionsBitField.Flags.ViewChannel,
+      PermissionsBitField.Flags.ReadMessageHistory,
+    ])) {
       console.log(`Missing permissions for channel ${channel.name} (${channel.id}).`);
-      return interaction.editReply({ content: 'Missing permissions for the main chat channel.' });
+      return interaction.editReply({ content: 'Missing permissions for the specified channel.' });
     }
 
     console.log(`Starting message synchronization for channel ${channel.name} (${channel.id}).`);
@@ -103,13 +112,17 @@ module.exports = {
 
       await user.save();
 
-      const roleId = config.roles[user.lvl];
-      if (roleId) {
-        const role = guild.roles.cache.get(roleId);
-        if (role) {
-          const previousRoles = Object.values(config.roles).filter(r => r !== roleId);
-          member.roles.remove(previousRoles).catch(console.error);
-          member.roles.add(role).catch(console.error);
+      const levelRoles = config.roles;
+      const userLevel = user.lvl;
+
+      const allLevelRoleIds = Object.values(levelRoles);
+      await member.roles.remove(allLevelRoleIds).catch(console.error);
+
+      const newRoleId = levelRoles[userLevel];
+      if (newRoleId) {
+        const newRole = guild.roles.cache.get(newRoleId);
+        if (newRole) {
+          await member.roles.add(newRole).catch(console.error);
         }
       }
 
