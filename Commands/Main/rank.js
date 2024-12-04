@@ -26,8 +26,9 @@ module.exports = {
 
     function generateLevelBar(xp, level) {
       const totalBars = 20;
-      const xpForNextLevel = getXpForNextLevel(level);
-      const filledBars = Math.floor((xp / xpForNextLevel) * totalBars);
+      const xpForNextLevel = getXpForNextLevel(level) || 1; 
+      const progress = xp / xpForNextLevel;
+      const filledBars = Math.round(Math.min(progress, 1) * totalBars);
       const emptyBars = totalBars - filledBars;
       return `${'■'.repeat(filledBars)}${'□'.repeat(emptyBars)}`;
     }

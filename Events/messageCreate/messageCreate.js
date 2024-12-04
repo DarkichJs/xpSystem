@@ -46,8 +46,16 @@ module.exports = async (client, message) => {
 
         message.channel.send({ embeds: [levelUpEmbed] }).then(sentMessage => {
             setTimeout(() => {
-                sentMessage.delete().catch(console.error);
-            }, 10000); 
+                sentMessage.delete().catch(error => {
+                    if (error.code !== 50013) {
+                        console.error('Failed to delete message:', error);
+                    }
+                });
+            }, 10000);
+        }).catch(error => {
+            if (error.code !== 50013) {
+                console.error('Failed to send level up message:', error);
+            }
         });
 
         const roles = config.roles;
