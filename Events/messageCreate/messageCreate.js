@@ -55,6 +55,8 @@ module.exports = async (client, message) => {
         if (roles[user.lvl]) {
             const role = message.guild.roles.cache.get(roles[user.lvl]);
             if (role) {
+                const previousRoles = Object.values(roles).filter(r => r !== roles[user.lvl]);
+                message.member.roles.remove(previousRoles).catch(console.error);
                 message.member.roles.add(role).catch(console.error);
             }
         }
