@@ -28,7 +28,7 @@ module.exports = async (client, message) => {
     }
 
     function getXpForNextLevel(level) {
-        return 50 * level + 50; 
+        return 100 + (level - 1) * 50;
     }
     
     user.xp = (user.xp || 0) + config.xpPerMessage;

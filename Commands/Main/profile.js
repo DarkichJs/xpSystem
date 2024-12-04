@@ -30,7 +30,7 @@ module.exports = {
     }
 
     function getXpForNextLevel(level) {
-      return 50 * level + 50; 
+      return 100 + (level - 1) * 50;
   }
   
 
@@ -48,9 +48,9 @@ module.exports = {
     const messagesToNextLevel = Math.ceil((xpForNextLevel - user_find.xp) / xpPerMessage);
 
     const embed = new EmbedBuilder()
-      .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1305439515518701599.webp?size=96'})
+      .setAuthor({name: `Profile - ${user.tag}`, iconURL: 'https://cdn.discordapp.com/emojis/1304721428217860106.webp?size=96'})
       .setDescription(`
-        \`\`\`・Messages: ${user_find.messages} -> Left: ${messagesToNextLevel}\`\`\`
+        \`\`\`・Messages: ${user_find.messages}\`\`\`
         \`\`\`・XP: ${user_find.xp}\`\`\`
         \`\`\`・Level: ${user_find.lvl}\`\`\`
         \`\`\`${levelBar}\`\`\`

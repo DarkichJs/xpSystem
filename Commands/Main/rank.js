@@ -20,7 +20,7 @@ module.exports = {
     }
 
     function getXpForNextLevel(level) {
-      return 50 * level + 50; 
+      return 100 + (level - 1) * 50;
   }
   
 
