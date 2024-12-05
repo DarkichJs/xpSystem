@@ -78,7 +78,9 @@ module.exports = {
     await updateLeaderboard();
 
     const filter = i =>
-      i.customId === 'prev_page' || i.customId === 'next_page' || i.customId === 'category_select';
+      (i.customId === 'prev_page' || i.customId === 'next_page' || i.customId === 'category_select') 
+      && i.user.id === interaction.user.id;
+
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
 
     collector.on('collect', async i => {
