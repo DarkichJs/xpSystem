@@ -38,8 +38,8 @@ module.exports = {
     user.xp += amount;
 
     function getXpForNextLevel(level) {
-      return 35 + (level * 15);
-    }
+      return 100 + (level - 1) * 50;
+  }
 
     let xpForNextLevel = getXpForNextLevel(user.lvl);
     while (user.xp >= xpForNextLevel) {
