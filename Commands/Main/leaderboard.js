@@ -13,7 +13,6 @@ module.exports = {
     const itemsPerPage = 10;
 
     const categories = {
-      xp: 'XP',
       level: 'Level',
       messages: 'Messages'
     };
@@ -61,7 +60,6 @@ module.exports = {
             .setCustomId('category_select')
             .setPlaceholder('Select Category')
             .addOptions(
-              { label: 'XP', value: 'xp' },
               { label: 'Level', value: 'level' },
               { label: 'Messages', value: 'messages' }
             )
