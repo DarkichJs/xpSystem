@@ -8,7 +8,7 @@ module.exports = {
     .setDescription('Display the leaderboard'),
 
   async execute(interaction) {
-    let category = 'xp'; 
+    let category = 'messages'; 
     let page = 1; 
     const itemsPerPage = 10;
 
