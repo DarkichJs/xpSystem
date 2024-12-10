@@ -118,8 +118,11 @@ module.exports = {
       const allLevelRoleIds = Object.values(levelRoles);
       await member.roles.remove(allLevelRoleIds).catch(console.error);
 
-      const newRoleId = levelRoles[userLevel];
-      if (newRoleId) {
+      const roleLevels = Object.keys(levelRoles).map(Number).filter(lvl => lvl <= userLevel);
+      const assignableLevel = Math.max(...roleLevels);
+
+      if (isFinite(assignableLevel)) {
+        const newRoleId = levelRoles[assignableLevel];
         const newRole = guild.roles.cache.get(newRoleId);
         if (newRole) {
           await member.roles.add(newRole).catch(console.error);
