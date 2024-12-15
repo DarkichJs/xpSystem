@@ -44,19 +44,18 @@ module.exports = async (client, message) => {
             .setColor("#303136")
             .setThumbnail(message.author.displayAvatarURL({ dynamic: true }));
 
-        message.channel.send({ embeds: [levelUpEmbed] }).then(sentMessage => {
-            setTimeout(() => {
-                sentMessage.delete().catch(error => {
-                    if (error.code !== 50013) {
-                        console.error('Failed to delete message:', error);
-                    }
-                });
-            }, 10000);
-        }).catch(error => {
-            if (error.code !== 50013) {
-                console.error('Failed to send level up message:', error);
-            }
-        });
+        const levelUpChannelId = config.levelupchannel;
+        const levelUpChannel = message.guild.channels.cache.get(levelUpChannelId);
+
+        if (levelUpChannel) {
+            levelUpChannel.send({ embeds: [levelUpEmbed] }).catch(error => {
+                if (error.code !== 50013) {
+                    console.error('Failed to send level up message:', error);
+                }
+            });
+        } else {
+            console.error('Level up channel not found.');
+        }
 
         const roles = config.roles;
         const perLevel = config.perlevel;

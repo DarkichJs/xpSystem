@@ -20,7 +20,8 @@ module.exports = {
       return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
     }
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
+    await interaction.editReply({ content: 'Synchronization has started. This may take some time.' });
 
     const guild = interaction.guild;
     const messageCounts = {};
@@ -28,7 +29,7 @@ module.exports = {
     const channel = guild.channels.cache.get(channelId);
 
     if (!channel) {
-      return interaction.editReply({ content: 'Specified channel not found.' });
+      return interaction.followUp({ content: 'Specified channel not found.' });
     }
 
     const botMember = guild.members.me;
@@ -111,12 +112,13 @@ module.exports = {
       user.xp = totalXp;
 
       await user.save();
+
       const perLevel = config.perlevel;
       const perMessage = config.perMessage;
       const levelRoles = config.roles;
       const userLevel = user.lvl;
       const userMessages = user.messages;
-
+      
       const allLevelRoleIds = Object.values(levelRoles);
       await member.roles.remove(allLevelRoleIds).catch(console.error);
 
@@ -146,6 +148,7 @@ module.exports = {
     }
 
     console.log('Synchronization complete.');
-    interaction.editReply({ content: 'Message counts, XP, levels, and roles have been synchronized.' });
+    interaction.channel.send('Message counts, XP, levels, and roles have been synchronized.');
+    console.log('Sync ended');
   },
 };
