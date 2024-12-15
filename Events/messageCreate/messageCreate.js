@@ -59,13 +59,30 @@ module.exports = async (client, message) => {
         });
 
         const roles = config.roles;
+        const perLevel = config.perlevel;
+        const perMessage = config.perMessage;
 
-        if (roles[user.lvl]) {
-            const role = message.guild.roles.cache.get(roles[user.lvl]);
-            if (role) {
-                const previousRoles = Object.values(roles).filter(r => r !== roles[user.lvl]);
-                message.member.roles.remove(previousRoles).catch(console.error);
-                message.member.roles.add(role).catch(console.error);
+        if (perLevel) {
+            if (roles[user.lvl]) {
+                const role = message.guild.roles.cache.get(roles[user.lvl]);
+                if (role) {
+                    const previousRoles = Object.values(roles).filter(r => r !== roles[user.lvl]);
+                    message.member.roles.remove(previousRoles).catch(console.error);
+                    message.member.roles.add(role).catch(console.error);
+                }
+            }
+        } else if (perMessage) {
+            const userMessages = user.messages;
+            const roleLevels = Object.keys(roles).map(Number).filter(msgCount => msgCount <= userMessages);
+            const assignableMessageCount = Math.max(...roleLevels);
+            if (isFinite(assignableMessageCount)) {
+                const roleId = roles[assignableMessageCount];
+                const role = message.guild.roles.cache.get(roleId);
+                if (role) {
+                    const previousRoles = Object.values(roles).filter(r => r !== roleId);
+                    message.member.roles.remove(previousRoles).catch(console.error);
+                    message.member.roles.add(role).catch(console.error);
+                }
             }
         }
     }

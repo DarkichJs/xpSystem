@@ -1,6 +1,8 @@
 {
     token: "",
     mongo: "",
+    "perlevel": true,
+    "perMessage": false,
     excludedChannels: [],
     roles: [],
     adminIds: [],

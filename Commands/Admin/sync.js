@@ -2,7 +2,11 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const User = require('../../Schema/user.js');
 const config = require('../../config.json');
-
+const perLevel = config.perlevel;
+const perMessage = config.perMessage;
+const levelRoles = config.roles;
+const userLevel = user.lvl;
+const userMessages = user.messages;
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sync')
@@ -112,20 +116,29 @@ module.exports = {
 
       await user.save();
 
-      const levelRoles = config.roles;
-      const userLevel = user.lvl;
 
       const allLevelRoleIds = Object.values(levelRoles);
       await member.roles.remove(allLevelRoleIds).catch(console.error);
 
-      const roleLevels = Object.keys(levelRoles).map(Number).filter(lvl => lvl <= userLevel);
-      const assignableLevel = Math.max(...roleLevels);
-
-      if (isFinite(assignableLevel)) {
-        const newRoleId = levelRoles[assignableLevel];
-        const newRole = guild.roles.cache.get(newRoleId);
-        if (newRole) {
-          await member.roles.add(newRole).catch(console.error);
+      if (perLevel) {
+        const roleLevels = Object.keys(levelRoles).map(Number).filter(lvl => lvl <= userLevel);
+        const assignableLevel = Math.max(...roleLevels);
+        if (isFinite(assignableLevel)) {
+          const newRoleId = levelRoles[assignableLevel];
+          const newRole = guild.roles.cache.get(newRoleId);
+          if (newRole) {
+            await member.roles.add(newRole).catch(console.error);
+          }
+        }
+      } else if (perMessage) {
+        const roleMessages = Object.keys(levelRoles).map(Number).filter(msgCount => msgCount <= userMessages);
+        const assignableMessageCount = Math.max(...roleMessages);
+        if (isFinite(assignableMessageCount)) {
+          const newRoleId = levelRoles[assignableMessageCount];
+          const newRole = guild.roles.cache.get(newRoleId);
+          if (newRole) {
+            await member.roles.add(newRole).catch(console.error);
+          }
         }
       }
 
