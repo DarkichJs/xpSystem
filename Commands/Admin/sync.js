@@ -2,11 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const User = require('../../Schema/user.js');
 const config = require('../../config.json');
-const perLevel = config.perlevel;
-const perMessage = config.perMessage;
-const levelRoles = config.roles;
-const userLevel = user.lvl;
-const userMessages = user.messages;
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sync')
@@ -115,7 +111,11 @@ module.exports = {
       user.xp = totalXp;
 
       await user.save();
-
+      const perLevel = config.perlevel;
+      const perMessage = config.perMessage;
+      const levelRoles = config.roles;
+      const userLevel = user.lvl;
+      const userMessages = user.messages;
 
       const allLevelRoleIds = Object.values(levelRoles);
       await member.roles.remove(allLevelRoleIds).catch(console.error);
