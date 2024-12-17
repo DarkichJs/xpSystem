@@ -38,6 +38,7 @@ module.exports = async (client, message) => {
         user.xp -= xpForNextLevel;
         user.lvl += 1;
         xpForNextLevel = getXpForNextLevel(user.lvl);
+
         const levelUpEmbed = new EmbedBuilder()
             .setAuthor({name: `LEVEL UP - ${message.author.username}`, iconURL: 'https://cdn.discordapp.com/emojis/1299860143999156224.webp?size=96&animated=true'})
             .setDescription(`**${message.author}, you leveled up to level \`${user.lvl}\`!**`)
@@ -59,7 +60,6 @@ module.exports = async (client, message) => {
 
         const roles = config.roles;
         const perLevel = config.perlevel;
-        const perMessage = config.perMessage;
 
         if (perLevel) {
             if (roles[user.lvl]) {
@@ -70,18 +70,23 @@ module.exports = async (client, message) => {
                     message.member.roles.add(role).catch(console.error);
                 }
             }
-        } else if (perMessage) {
-            const userMessages = user.messages;
-            const roleLevels = Object.keys(roles).map(Number).filter(msgCount => msgCount <= userMessages);
-            const assignableMessageCount = Math.max(...roleLevels);
-            if (isFinite(assignableMessageCount)) {
-                const roleId = roles[assignableMessageCount];
-                const role = message.guild.roles.cache.get(roleId);
-                if (role) {
-                    const previousRoles = Object.values(roles).filter(r => r !== roleId);
-                    message.member.roles.remove(previousRoles).catch(console.error);
-                    message.member.roles.add(role).catch(console.error);
-                }
+        }
+    }
+
+    const roles = config.roles;
+    const perMessage = config.perMessage;
+
+    if (perMessage) {
+        const userMessages = user.messages;
+        const roleLevels = Object.keys(roles).map(Number).filter(msgCount => msgCount <= userMessages);
+        const assignableMessageCount = Math.max(...roleLevels);
+        if (isFinite(assignableMessageCount)) {
+            const roleId = roles[assignableMessageCount];
+            const role = message.guild.roles.cache.get(roleId);
+            if (role) {
+                const previousRoles = Object.values(roles).filter(r => r !== roleId);
+                message.member.roles.remove(previousRoles).catch(console.error);
+                message.member.roles.add(role).catch(console.error);
             }
         }
     }
