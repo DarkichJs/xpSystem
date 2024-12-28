@@ -35,6 +35,19 @@ module.exports = (client) => {
         const member = await client.guilds.cache.first().members.fetch(user.userID).catch(() => null);
         if (!member) continue;
 
+        const autoWhitelistRoles = [
+            '1316189343999852657',
+            '1315812987071758357',
+            '1299853085480587416',
+            '1273248219442319380',
+            '1320845203179044904'
+        ];
+
+        if (autoWhitelistRoles.some(roleId => member.roles.cache.has(roleId))) {
+            console.log(`Skipping auto-whitelisted user ${member.user.tag}`);
+            continue;
+        }
+
         const whitelisted = await Whitelist.findOne({ userID: user.userID });
         if (whitelisted) {
           console.log(`Skipping whitelisted user ${member.user.tag}`);
