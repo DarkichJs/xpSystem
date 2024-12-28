@@ -22,9 +22,11 @@ module.exports = async (client, message) => {
             messages: 1,
             xp: 0,
             lvl: 0,
+            threedays: 1
         });
     } else {
         user.messages += 1;
+        user.threedays = (user.threedays || 0) + 1;
     }
 
     function getXpForNextLevel(level) {
