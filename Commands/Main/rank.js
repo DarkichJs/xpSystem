@@ -4,7 +4,7 @@ const User = require('../../Schema/user.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('srank')
+    .setName('rank')
     .setDescription('Display your rank, XP, level, and progress bar')
     .addUserOption(option => 
       option.setName('user')

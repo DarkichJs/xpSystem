@@ -8,7 +8,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const User = require("../../Schema/user.js");
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("sprofile")
+    .setName("profile")
     .setDescription(`Profile`)
     .addUserOption((option) =>
       option.setName("user").setDescription(`User`).setRequired(false)

@@ -5,7 +5,7 @@ const config = require('../../config.json'); // Import config
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('sgivexp')
+    .setName('givexp')
     .setDescription('Give XP to a user')
     .addUserOption(option => 
       option.setName('user')

@@ -4,7 +4,7 @@ const User = require('../../Schema/user.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('sleaderboard')
+    .setName('leaderboard')
     .setDescription('Display the leaderboard'),
 
   async execute(interaction) {
