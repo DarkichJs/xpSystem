@@ -55,4 +55,12 @@ readdirSync("./Events").forEach((folder) => {
 });
 console.log(table_event.toString());
 console.log(table_commands.toString());
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception thrown:', err);
+});
+
 client.login(token);

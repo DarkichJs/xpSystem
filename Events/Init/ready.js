@@ -64,11 +64,11 @@ module.exports = (client) => {
             continue;
           }
 
-          let messageThreshold = 350;
+          let messageThreshold = 175;
           if (member.roles.cache.has('1123482262684581920')) {
-            messageThreshold = 250;
+            messageThreshold = 125;
           } else if (member.roles.cache.has('1285154122743550005')) {
-            messageThreshold = 100;
+            messageThreshold = 50;
           }
 
           const inactiveRole = await client.guilds.cache.first().roles.fetch('1322442902756003840');
