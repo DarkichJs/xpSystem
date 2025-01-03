@@ -79,7 +79,11 @@ module.exports = {
           new ButtonBuilder()
             .setCustomId('threedays_resetAll')
             .setLabel('Remove Role & Reset')
-            .setStyle(ButtonStyle.Danger)
+            .setStyle(ButtonStyle.Danger),
+          new ButtonBuilder()
+            .setCustomId('threedays_reissueRole')
+            .setLabel('regive role')
+            .setStyle(ButtonStyle.Primary)
         );
 
       return { embeds: [embed], components: [buttonRow] };
@@ -123,6 +127,52 @@ module.exports = {
 
         collector.stop();
         await interaction.editReply({ content: 'Role removed from all, `threedays` reset, and new 3-day cycle started.', embeds: [], components: [] });
+      } else if (i.customId === 'threedays_reissueRole') {
+        await i.deferUpdate();
+        try {
+          const guild = interaction.guild;
+          const inactiveRole = guild.roles.cache.get(roleIdToRemove);
+          const allUsers = await User.find({});
+
+          const WhitelistModel = require('../../Schema/whitelist.js');
+          const allWhitelists = await WhitelistModel.find({});
+          const whitelistedSet = new Set(allWhitelists.map(w => w.userID));
+
+          for (const user of allUsers) {
+            const member = guild.members.cache.get(user.userID);
+            if (!member) continue;
+
+            if (autoWhitelistRoles.some(roleId => member.roles.cache.has(roleId))) {
+              continue;
+            }
+            if (whitelistedSet.has(user.userID)) {
+              continue;
+            }
+
+            let messageThreshold = 175;
+            if (member.roles.cache.has('1123482262684581920')) {
+              messageThreshold = 125;
+            } else if (member.roles.cache.has('1285154122743550005')) {
+              messageThreshold = 50;
+            }
+
+            if (user.threedays < messageThreshold) {
+              if (inactiveRole && !member.roles.cache.has(inactiveRole.id)) {
+                await member.roles.add(inactiveRole).catch(() => null);
+              }
+            } else {
+              if (inactiveRole && member.roles.cache.has(inactiveRole.id)) {
+                await member.roles.remove(inactiveRole).catch(() => null);
+              }
+            }
+          }
+
+          await interaction.editReply({ content: 'Regive ended', embeds: [], components: [] });
+          collector.stop();
+        } catch (error) {
+          console.error('Error reissuing role:', error);
+          await interaction.followUp({ content: 'Error', ephemeral: true });
+        }
       }
     });
 
