@@ -27,7 +27,7 @@ module.exports = {
     const allWhitelists = await Whitelist.find({});
     const whitelistedSet = new Set(allWhitelists.map(w => w.userID));
 
-    const filteredUsers = [];
+    let filteredUsers = [];
     for (const u of allUsers) {
       const member = interaction.guild.members.cache.get(u.userID);
       if (!member) continue;
@@ -42,10 +42,10 @@ module.exports = {
 
     await interaction.deferReply();
 
-    const updatePage = async (currentPage) => {
+    const updatePage = async (currentPage, users = filteredUsers) => {
       const startIndex = (currentPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
-      const pageUsers = filteredUsers.slice(startIndex, endIndex);
+      const pageUsers = users.slice(startIndex, endIndex);
 
       const embed = new EmbedBuilder()
         .setTitle('3-Day Messages')
@@ -62,7 +62,7 @@ module.exports = {
         );
       }
 
-      embed.setFooter({ text: `Page ${currentPage} of ${Math.ceil(filteredUsers.length / itemsPerPage)}` });
+      embed.setFooter({ text: `Page ${currentPage} of ${Math.ceil(users.length / itemsPerPage)}` });
 
       const buttonRow = new ActionRowBuilder()
         .addComponents(
@@ -75,7 +75,7 @@ module.exports = {
             .setCustomId('threedays_next')
             .setLabel('Next')
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(endIndex >= filteredUsers.length),
+            .setDisabled(endIndex >= users.length),
           new ButtonBuilder()
             .setCustomId('threedays_resetAll')
             .setLabel('Remove Role & Reset')
@@ -83,7 +83,11 @@ module.exports = {
           new ButtonBuilder()
             .setCustomId('threedays_reissueRole')
             .setLabel('regive role')
-            .setStyle(ButtonStyle.Primary)
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId('threedays_inactiveSort')
+            .setLabel('Sort Inactive')
+            .setStyle(ButtonStyle.Secondary)
         );
 
       return { embeds: [embed], components: [buttonRow] };
@@ -173,6 +177,16 @@ module.exports = {
           console.error('Error reissuing role:', error);
           await interaction.followUp({ content: 'Error', ephemeral: true });
         }
+      } else if (i.customId === 'threedays_inactiveSort') {
+        await i.deferUpdate();
+        const guild = i.guild;
+        const inactiveRole = guild.roles.cache.get(roleIdToRemove);
+        filteredUsers = filteredUsers.filter(u => {
+          const memberCheck = guild.members.cache.get(u.userID);
+          return memberCheck && inactiveRole && memberCheck.roles.cache.has(inactiveRole.id);
+        });
+        page = 1;
+        await i.editReply(await updatePage(page, filteredUsers));
       }
     });
 
