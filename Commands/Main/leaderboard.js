@@ -103,8 +103,8 @@ module.exports = {
         try {
           await i.deferUpdate();
         } catch (err) {
-          if (err.rawError?.code === 10062) {
-            console.log("Interaction is no longer valid or has expired.");
+          if (err.rawError?.code === 10008) {
+            console.log("Message was deleted or is no longer accessible.");
             return;
           }
           console.error(err);
@@ -123,7 +123,15 @@ module.exports = {
       });
 
       collector.on('end', async () => {
-        await interaction.editReply({ components: [] });
+        try {
+          await interaction.editReply({ components: [] });
+        } catch (err) {
+          if (err.rawError?.code === 10008) {
+            console.log("Cannot edit reply after collector ended (message not found).");
+          } else {
+            console.error(err);
+          }
+        }
       });
     } catch (error) {
       console.error(error);
