@@ -35,51 +35,55 @@ module.exports = async (client, interaction) => {
   const buttonHandlers = loadHandlers(path.join(__dirname, "../../Handlers/Buttons"));
   const modalHandlers = loadHandlers(path.join(__dirname, "../../Handlers/Modals"));
 
-  if (interaction.isButton()) {
-    const handler = buttonHandlers[interaction.customId];
-    if (handler) {
-      handler(client, interaction);
-    }
-  }
-
-  if (interaction.isModalSubmit()) {
-    const handler = modalHandlers[interaction.customId];
-    if (handler) {
-      handler(client, interaction);
-    }
-  }
-
-  if (interaction.isCommand()) {
-    const command = client.commands.get(interaction.commandName);
-    if (!command) return;
-
-    let err = 0;
-
-    if (command.requiredPerms) {
-      command.requiredPerms.forEach(async (perm) => {
-        if (!interaction.member.permissions.has(perm)) {
-          err = 1;
-          interaction.reply({
-            content: `You need the following permission to run this: ${"`" + perm + "`"}`,
-            ephemeral: true,
-          });
-        }
-      });
+  try {
+    if (interaction.isButton()) {
+      const handler = buttonHandlers[interaction.customId];
+      if (handler) {
+        await handler(client, interaction);
+      }
     }
 
-    if (command.botRequiredPerms) {
-      command.botRequiredPerms.forEach(async (perm) => {
-        if (!interaction.guild.me.permissions.has(perm)) {
-          err = 1;
-          interaction.reply({
-            content: `I need the following permission to run this: ${"`" + perm + "`"}`,
-            ephemeral: true,
-          });
-        }
-      });
+    if (interaction.isModalSubmit()) {
+      const handler = modalHandlers[interaction.customId];
+      if (handler) {
+        await handler(client, interaction);
+      }
     }
-    if (err) return;
 
-    await command.execute(interaction);
+    if (interaction.isCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) return;
+
+      let err = 0;
+
+      if (command.requiredPerms) {
+        command.requiredPerms.forEach(async (perm) => {
+          if (!interaction.member.permissions.has(perm)) {
+            err = 1;
+            interaction.reply({
+              content: `You need the following permission to run this: ${"`" + perm + "`"}`,
+              ephemeral: true,
+            });
+          }
+        });
+      }
+
+      if (command.botRequiredPerms) {
+        command.botRequiredPerms.forEach(async (perm) => {
+          if (!interaction.guild.me.permissions.has(perm)) {
+            err = 1;
+            interaction.reply({
+              content: `I need the following permission to run this: ${"`" + perm + "`"}`,
+              ephemeral: true,
+            });
+          }
+        });
+      }
+      if (err) return;
+
+      await command.execute(interaction);
+    }
+  } catch (error) {
+    console.error('Error handling interaction:', error);
   }
 };
