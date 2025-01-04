@@ -100,6 +100,16 @@ module.exports = {
       const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
 
       collector.on('collect', async i => {
+        try {
+          await i.deferUpdate();
+        } catch (err) {
+          if (err.rawError?.code === 10062) {
+            console.log("Interaction is no longer valid or has expired.");
+            return;
+          }
+          console.error(err);
+        }
+      
         if (i.customId === 'prev_page') {
           page = Math.max(1, page - 1);
         } else if (i.customId === 'next_page') {
@@ -108,7 +118,7 @@ module.exports = {
           category = i.values[0];
           page = 1;
         }
-        await i.deferUpdate();
+      
         await updateLeaderboard();
       });
 
