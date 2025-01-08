@@ -45,13 +45,7 @@ module.exports = (client) => {
           const member = await client.guilds.cache.first().members.fetch(user.userID).catch(() => null);
           if (!member) continue;
 
-          const autoWhitelistRoles = [
-            '1316189343999852657',
-            '1315812987071758357',
-            '1299853085480587416',
-            '1273248219442319380',
-            '1320845203179044904'
-          ];
+          const autoWhitelistRoles = config.autoWhitelistRoles;
 
           if (autoWhitelistRoles.some(roleId => member.roles.cache.has(roleId))) {
             console.log(`Skipping auto-whitelisted user ${member.user.tag}`);
@@ -64,14 +58,17 @@ module.exports = (client) => {
             continue;
           }
 
-          let messageThreshold = 175;
-          if (member.roles.cache.has('1123482262684581920')) {
-            messageThreshold = 125;
-          } else if (member.roles.cache.has('1285154122743550005')) {
-            messageThreshold = 50;
+          const messageThresholds = config.messageThreshold;
+          let messageThreshold = config.messageThresholddefault;
+
+          for (const [roleId, threshold] of Object.entries(messageThresholds)) {
+            if (member.roles.cache.has(roleId)) {
+              messageThreshold = threshold;
+              break;
+            }
           }
 
-          const inactiveRole = await client.guilds.cache.first().roles.fetch('1322442902756003840');
+          const inactiveRole = await client.guilds.cache.first().roles.fetch(config.inactiveRoleId);
           if (user.threedays < messageThreshold) {
             if (inactiveRole && !member.roles.cache.has(inactiveRole.id)) {
               await member.roles.add(inactiveRole);

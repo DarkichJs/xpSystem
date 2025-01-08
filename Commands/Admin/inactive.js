@@ -7,7 +7,7 @@ const Whitelist = require('../../Schema/whitelist.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('threedays')
+    .setName('inactive')
     .setDescription('List how many messages users wrote in the last 3 days'),
 
   async execute(interaction) {
@@ -16,13 +16,7 @@ module.exports = {
         return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
       }
 
-      const autoWhitelistRoles = [
-        '1316189343999852657',
-        '1315812987071758357',
-        '1299853085480587416',
-        '1273248219442319380',
-        '1320845203179044904'
-      ];
+      const autoWhitelistRoles = config.autoWhitelistRoles;
 
       const allUsers = await User.find().sort({ threedays: -1 }).lean();
       const allWhitelists = await Whitelist.find({});
@@ -39,7 +33,7 @@ module.exports = {
 
       let page = 1;
       const itemsPerPage = 10;
-      const roleIdToRemove = '1322442902756003840';
+      const roleIdToRemove = config.inactiveRoleId
 
       await interaction.deferReply();
 
@@ -49,7 +43,7 @@ module.exports = {
         const pageUsers = users.slice(startIndex, endIndex);
 
         const embed = new EmbedBuilder()
-          .setTitle('3-Day Messages')
+          .setTitle('Inactive Messages')
           .setColor('#303136');
 
         if (pageUsers.length === 0) {
@@ -154,11 +148,14 @@ module.exports = {
                 continue;
               }
 
-              let messageThreshold = 175;
-              if (member.roles.cache.has('1123482262684581920')) {
-                messageThreshold = 125;
-              } else if (member.roles.cache.has('1285154122743550005')) {
-                messageThreshold = 50;
+              const messageThresholds = config.messageThreshold;
+              let messageThreshold = config.messageThresholddefault;
+
+              for (const [roleId, threshold] of Object.entries(messageThresholds)) {
+                if (member.roles.cache.has(roleId)) {
+                  messageThreshold = threshold;
+                  break;
+                }
               }
 
               if (user.threedays < messageThreshold) {
