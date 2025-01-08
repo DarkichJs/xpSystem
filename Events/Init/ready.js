@@ -37,7 +37,7 @@ module.exports = (client) => {
       const lastResetStamp = Number(resetDoc.lastResetTime) || 0;
       const nowStamp = Date.now();
 
-      if (nowStamp - lastResetStamp >= 3 * 24 * 60 * 60 * 1000) {
+      if (nowStamp - lastResetStamp >= config.inactiveDaysThreshold * 24 * 60 * 60 * 1000) {
         const users = await User.find({});
         const Whitelist = require('../../Schema/whitelist.js');
 

@@ -5,6 +5,6 @@ const schema = mongoose.Schema({
     messages: Number,
     xp: Number,
     lvl: Number,
-    threedays: Number
+    inactive: Number
 });
 module.exports = mongoose.model(`User`, schema)

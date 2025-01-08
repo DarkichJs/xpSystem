@@ -18,7 +18,7 @@ module.exports = {
 
       const autoWhitelistRoles = config.autoWhitelistRoles;
 
-      const allUsers = await User.find().sort({ threedays: -1 }).lean();
+      const allUsers = await User.find().sort({ incative: -1 }).lean();
       const allWhitelists = await Whitelist.find({});
       const whitelistedSet = new Set(allWhitelists.map(w => w.userID));
 
@@ -52,7 +52,7 @@ module.exports = {
           embed.setDescription(
             pageUsers.map((u, i) => {
               const position = startIndex + i + 1;
-              return `${position}. <@${u.userID}> - **Messages (3 days):** ${u.threedays || 0}`;
+              return `${position}. <@${u.userID}> - **Messages (3 days):** ${u.incative || 0}`;
             }).join('\n')
           );
         }
@@ -62,25 +62,25 @@ module.exports = {
         const buttonRow = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
-              .setCustomId('threedays_prev')
+              .setCustomId('incative_prev')
               .setLabel('Previous')
               .setStyle(ButtonStyle.Primary)
               .setDisabled(currentPage === 1),
             new ButtonBuilder()
-              .setCustomId('threedays_next')
+              .setCustomId('incative_next')
               .setLabel('Next')
               .setStyle(ButtonStyle.Primary)
               .setDisabled(endIndex >= users.length),
             new ButtonBuilder()
-              .setCustomId('threedays_resetAll')
+              .setCustomId('incative_resetAll')
               .setLabel('Remove Role & Reset')
               .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-              .setCustomId('threedays_reissueRole')
+              .setCustomId('incative_reissueRole')
               .setLabel('regive role')
               .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-              .setCustomId('threedays_inactiveSort')
+              .setCustomId('incative_inactiveSort')
               .setLabel('Sort Inactive')
               .setStyle(ButtonStyle.Secondary)
           );
@@ -97,13 +97,13 @@ module.exports = {
           return i.reply({ content: 'This is not for you.', ephemeral: true });
         }
 
-        if (i.customId === 'threedays_prev') {
+        if (i.customId === 'incative_prev') {
           page = Math.max(1, page - 1);
           await i.update(await updatePage(page));
-        } else if (i.customId === 'threedays_next') {
+        } else if (i.customId === 'incative_next') {
           page = Math.min(Math.ceil(filteredUsers.length / itemsPerPage), page + 1);
           await i.update(await updatePage(page));
-        } else if (i.customId === 'threedays_resetAll') {
+        } else if (i.customId === 'incative_resetAll') {
           await i.deferUpdate();
 
           const guild = interaction.guild;
@@ -113,7 +113,7 @@ module.exports = {
             for (const member of membersWithRole.values()) {
               await member.roles.remove(roleToRemove).catch(() => null);
             }
-            await User.updateMany({}, { $set: { threedays: 0 } });
+            await User.updateMany({}, { $set: { incative: 0 } });
           }
 
           let resetDoc = await ResetTime.findOne({});
@@ -125,8 +125,8 @@ module.exports = {
           await resetDoc.save();
 
           collector.stop();
-          await interaction.editReply({ content: 'Role removed from all, `threedays` reset, and new 3-day cycle started.', embeds: [], components: [] });
-        } else if (i.customId === 'threedays_reissueRole') {
+          await interaction.editReply({ content: 'Role removed from all, `incative` reset, and new 3-day cycle started.', embeds: [], components: [] });
+        } else if (i.customId === 'incative_reissueRole') {
           await i.deferUpdate();
           try {
             const guild = interaction.guild;
@@ -158,7 +158,7 @@ module.exports = {
                 }
               }
 
-              if (user.threedays < messageThreshold) {
+              if (user.incative < messageThreshold) {
                 if (inactiveRole && !member.roles.cache.has(inactiveRole.id)) {
                   await member.roles.add(inactiveRole).catch(() => null);
                 }
@@ -175,7 +175,7 @@ module.exports = {
             console.error('Error reissuing role:', error);
             await interaction.followUp({ content: 'Error', ephemeral: true });
           }
-        } else if (i.customId === 'threedays_inactiveSort') {
+        } else if (i.customId === 'incative_inactiveSort') {
           await i.deferUpdate();
           const guild = i.guild;
           const inactiveRole = guild.roles.cache.get(roleIdToRemove);
@@ -194,7 +194,7 @@ module.exports = {
         } catch {}
       });
     } catch (error) {
-      console.error('Error in threedays command:', error);
+      console.error('Error in incative command:', error);
       return interaction.reply({ content: 'An error occurred.', ephemeral: true });
     }
   }
