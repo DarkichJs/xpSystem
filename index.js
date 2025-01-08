@@ -39,6 +39,10 @@ client.commands = new Collection();
 readdirSync("./Commands").forEach((folder) => {
   readdirSync(`./Commands/${folder}`).forEach((file) => {
     const command = require(`./Commands/${folder}/${file}`);
+    if (!config.xpsystem) {
+      // Skip registration of commands rank, profile, givexp
+      if (["rank","profile","givexp"].includes(command.data.name)) return;
+    }
     client.commands.set(command.data.name, command);
     commands.push(command.data.toJSON());
     table_commands.addRow(file, "✅");

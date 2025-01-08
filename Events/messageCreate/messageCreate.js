@@ -29,6 +29,8 @@ module.exports = async (client, message) => {
         user.threedays = (user.threedays || 0) + 1;
     }
 
+    if (!config.xpsystem) return; 
+
     function getXpForNextLevel(level) {
         return 100 + (level - 1) * 50;
     }
@@ -42,7 +44,7 @@ module.exports = async (client, message) => {
         xpForNextLevel = getXpForNextLevel(user.lvl);
 
         const levelUpEmbed = new EmbedBuilder()
-            .setAuthor({name: `LEVEL UP - ${message.author.username}`, iconURL: 'https://cdn.discordapp.com/emojis/1299860143999156224.webp?size=96&animated=true'})
+            .setAuthor({name: `LEVEL UP - ${message.author.username}`, iconURL: config.icons.levelUp})
             .setDescription(`**${message.author}, you leveled up to level \`${user.lvl}\`!**`)
             .setColor("#303136")
             .setThumbnail(message.author.displayAvatarURL({ dynamic: true }));

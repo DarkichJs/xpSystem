@@ -7,5 +7,6 @@
     excludedChannels: [],
     roles: [],
     adminIds: [],
-    xpPerMessage: ""
+    xpPerMessage: "",
+    "xpsystem": true
 }

@@ -16,13 +16,7 @@ module.exports = {
         return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
       }
 
-      const autoWhitelistRoles = [
-        '1316189343999852657',
-        '1315812987071758357',
-        '1299853085480587416',
-        '1273248219442319380',
-        '1320845203179044904'
-      ];
+      const autoWhitelistRoles = config.roleIds.autoWhitelist;
 
       const allUsers = await User.find().sort({ threedays: -1 }).lean();
       const allWhitelists = await Whitelist.find({});
@@ -39,7 +33,7 @@ module.exports = {
 
       let page = 1;
       const itemsPerPage = 10;
-      const roleIdToRemove = '1322442902756003840';
+      const roleIdToRemove = config.roleIds.inactiveRole;
 
       await interaction.deferReply();
 
@@ -156,9 +150,9 @@ module.exports = {
 
               let messageThreshold = 175;
               if (member.roles.cache.has('1123482262684581920')) {
-                messageThreshold = 125;
+                messageThreshold = config.roleIds.thresholds['1123482262684581920'];
               } else if (member.roles.cache.has('1285154122743550005')) {
-                messageThreshold = 50;
+                messageThreshold = config.roleIds.thresholds['1285154122743550005'];
               }
 
               if (user.threedays < messageThreshold) {

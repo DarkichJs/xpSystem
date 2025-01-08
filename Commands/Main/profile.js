@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const User = require("../../Schema/user.js");
+const config = require('../../config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -52,8 +53,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setAuthor({
           name: `Profile - ${user.tag}`,
-          iconURL:
-            "https://cdn.discordapp.com/emojis/1304721428217860106.webp?size=96",
+          iconURL: config.icons.profile
         })
         .setDescription(`
           \`\`\`・Messages: ${user_find.messages}\`\`\`

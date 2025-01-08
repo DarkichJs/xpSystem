@@ -7,6 +7,7 @@ const {
   StringSelectMenuBuilder
 } = require('discord.js');
 const User = require('../../Schema/user.js');
+const config = require('../../config.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,6 +19,10 @@ module.exports = {
       let category = 'messages';
       let page = 1;
       const itemsPerPage = 10;
+
+      if (!config.xpsystem) {
+        category = 'messages';
+      }
 
       const categories = {
         level: 'Level',
