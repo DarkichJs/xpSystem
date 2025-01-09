@@ -52,7 +52,7 @@ module.exports = {
           embed.setDescription(
             pageUsers.map((u, i) => {
               const position = startIndex + i + 1;
-              return `${position}. <@${u.userID}> - **Messages (3 days):** ${u.incative || 0}`;
+              return `${position}. <@${u.userID}> - **Messages (inactive):** ${u.incative || 0}`;
             }).join('\n')
           );
         }

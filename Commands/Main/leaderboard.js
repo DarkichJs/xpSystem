@@ -7,7 +7,7 @@ const {
   StringSelectMenuBuilder
 } = require('discord.js');
 const User = require('../../Schema/user.js');
-const config = require('../../config.js');
+const config = require('../../config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
