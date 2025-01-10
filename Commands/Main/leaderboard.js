@@ -106,36 +106,43 @@ module.exports = {
 
       collector.on('collect', async i => {
         try {
-          await i.deferUpdate();
-        } catch (err) {
-          if (err.rawError?.code === 10008) {
-            console.log("Message was deleted or is no longer accessible.");
-            return;
+          await i.deferUpdate().catch(err => {
+            if (err.code === 10062) return; // Unknown interaction
+            throw err;
+          });
+
+          if (i.customId === 'prev_page') {
+            page = Math.max(1, page - 1);
+          } else if (i.customId === 'next_page') {
+            page += 1;
+          } else if (i.customId === 'category_select') {
+            category = i.values[0];
+            page = 1;
           }
-          console.error(err);
+
+          try {
+            await updateLeaderboard();
+          } catch (err) {
+            if (err.code === 10008) { 
+              await interaction.channel.send({
+                content: 'Leaderboard session expired. Please use the command again.',
+                ephemeral: true
+              });
+              collector.stop();
+              return;
+            }
+            throw err;
+          }
+        } catch (error) {
+          console.error('Error in leaderboard collector:', error);
         }
-      
-        if (i.customId === 'prev_page') {
-          page = Math.max(1, page - 1);
-        } else if (i.customId === 'next_page') {
-          page += 1;
-        } else if (i.customId === 'category_select') {
-          category = i.values[0];
-          page = 1;
-        }
-      
-        await updateLeaderboard();
       });
 
       collector.on('end', async () => {
         try {
-          await interaction.editReply({ components: [] });
+          await interaction.editReply({ components: [] }).catch(() => {});
         } catch (err) {
-          if (err.rawError?.code === 10008) {
-            console.log("Cannot edit reply after collector ended (message not found).");
-          } else {
-            console.error(err);
-          }
+          console.log('Failed to remove components on collector end');
         }
       });
     } catch (error) {

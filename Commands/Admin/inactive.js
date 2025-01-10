@@ -18,14 +18,19 @@ module.exports = {
 
       const autoWhitelistRoles = config.autoWhitelistRoles;
 
-      const allUsers = await User.find().sort({ incative: -1 }).lean();
+      await User.updateMany({ incative: { $exists: false } }, { $set: { incative: 0 } });
+
+      const allUsers = await User.find()
+        .sort({ inactive: -1 }) 
+        .lean();
+
       const allWhitelists = await Whitelist.find({});
       const whitelistedSet = new Set(allWhitelists.map(w => w.userID));
 
       let filteredUsers = [];
       for (const u of allUsers) {
         const member = interaction.guild.members.cache.get(u.userID);
-        if (!member) continue;
+        if (!member) continue; 
         if (whitelistedSet.has(u.userID)) continue;
         if (autoWhitelistRoles.some(r => member.roles.cache.has(r))) continue;
         filteredUsers.push(u);
@@ -52,14 +57,15 @@ module.exports = {
           embed.setDescription(
             pageUsers.map((u, i) => {
               const position = startIndex + i + 1;
-              return `${position}. <@${u.userID}> - **Messages (inactive):** ${u.incative || 0}`;
+              console.log(u.inactive)
+              return `${position}. <@${u.userID}> - **Messages (inactive):** ${u.inactive || 0}`;
             }).join('\n')
           );
         }
 
         embed.setFooter({ text: `Page ${currentPage} of ${Math.ceil(users.length / itemsPerPage)}` });
 
-        const buttonRow = new ActionRowBuilder()
+        const buttonRow1 = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
               .setCustomId('incative_prev')
@@ -85,7 +91,15 @@ module.exports = {
               .setStyle(ButtonStyle.Secondary)
           );
 
-        return { embeds: [embed], components: [buttonRow] };
+        // const buttonRow2 = new ActionRowBuilder()
+        //   .addComponents(
+        //     new ButtonBuilder()
+        //       .setCustomId('incative_sync')
+        //       .setLabel('Synchronize')
+        //       .setStyle(ButtonStyle.Secondary)
+        //   );
+
+        return { embeds: [embed], components: [buttonRow1] };
       };
 
       const initialMessage = await interaction.editReply(await updatePage(page));
@@ -93,42 +107,39 @@ module.exports = {
       const collector = interaction.channel.createMessageComponentCollector({ time: 60000 });
 
       collector.on('collect', async (i) => {
-        if (i.user.id !== interaction.user.id) {
-          return i.reply({ content: 'This is not for you.', ephemeral: true });
-        }
+        try {
+          if (i.user.id !== interaction.user.id) {
+            return i.reply({ content: 'This is not for you.', ephemeral: true });
+          }
 
-        if (i.customId === 'incative_prev') {
-          page = Math.max(1, page - 1);
-          await i.update(await updatePage(page));
-        } else if (i.customId === 'incative_next') {
-          page = Math.min(Math.ceil(filteredUsers.length / itemsPerPage), page + 1);
-          await i.update(await updatePage(page));
-        } else if (i.customId === 'incative_resetAll') {
-          await i.deferUpdate();
-
-          const guild = interaction.guild;
-          const roleToRemove = guild.roles.cache.get(roleIdToRemove);
-          if (roleToRemove) {
-            const membersWithRole = roleToRemove.members;
-            for (const member of membersWithRole.values()) {
-              await member.roles.remove(roleToRemove).catch(() => null);
+          if (i.customId === 'incative_prev') {
+            page = Math.max(1, page - 1);
+            await i.update(await updatePage(page));
+          } else if (i.customId === 'incative_next') {
+            page = Math.min(Math.ceil(filteredUsers.length / itemsPerPage), page + 1);
+            await i.update(await updatePage(page));
+          } else if (i.customId === 'incative_resetAll') {
+            const guild = interaction.guild;
+            const roleToRemove = guild.roles.cache.get(roleIdToRemove);
+            if (roleToRemove) {
+              const membersWithRole = roleToRemove.members;
+              for (const member of membersWithRole.values()) {
+                await member.roles.remove(roleToRemove).catch(() => null);
+              }
+              await User.updateMany({}, { $set: { inactive: 0 } });
             }
-            await User.updateMany({}, { $set: { incative: 0 } });
-          }
 
-          let resetDoc = await ResetTime.findOne({});
-          if (!resetDoc) {
-            resetDoc = new ResetTime({ lastResetTime: Date.now().toString() });
-          } else {
-            resetDoc.lastResetTime = Date.now().toString();
-          }
-          await resetDoc.save();
+            let resetDoc = await ResetTime.findOne({});
+            if (!resetDoc) {
+              resetDoc = new ResetTime({ lastResetTime: Date.now().toString() });
+            } else {
+              resetDoc.lastResetTime = Date.now().toString();
+            }
+            await resetDoc.save();
 
-          collector.stop();
-          await interaction.editReply({ content: 'Role removed from all, `incative` reset, and new 3-day cycle started.', embeds: [], components: [] });
-        } else if (i.customId === 'incative_reissueRole') {
-          await i.deferUpdate();
-          try {
+            collector.stop();
+            await i.update({ content: 'Role removed from all, `inactive` reset, and new cycle started.', embeds: [], components: [] });
+          } else if (i.customId === 'incative_reissueRole') {
             const guild = interaction.guild;
             const inactiveRole = guild.roles.cache.get(roleIdToRemove);
             const allUsers = await User.find({});
@@ -141,12 +152,8 @@ module.exports = {
               const member = guild.members.cache.get(user.userID);
               if (!member) continue;
 
-              if (autoWhitelistRoles.some(roleId => member.roles.cache.has(roleId))) {
-                continue;
-              }
-              if (whitelistedSet.has(user.userID)) {
-                continue;
-              }
+              if (autoWhitelistRoles.some(roleId => member.roles.cache.has(roleId))) continue;
+              if (whitelistedSet.has(user.userID)) continue;
 
               const messageThresholds = config.messageThreshold;
               let messageThreshold = config.messageThresholddefault;
@@ -158,7 +165,7 @@ module.exports = {
                 }
               }
 
-              if (user.incative < messageThreshold) {
+              if (user.inactive < messageThreshold) {
                 if (inactiveRole && !member.roles.cache.has(inactiveRole.id)) {
                   await member.roles.add(inactiveRole).catch(() => null);
                 }
@@ -169,22 +176,20 @@ module.exports = {
               }
             }
 
-            await interaction.editReply({ content: 'Regive ended', embeds: [], components: [] });
+            await i.update({ content: 'Role reissue complete', embeds: [], components: [] });
             collector.stop();
-          } catch (error) {
-            console.error('Error reissuing role:', error);
-            await interaction.followUp({ content: 'Error', ephemeral: true });
+          } else if (i.customId === 'incative_inactiveSort') {
+            const guild = i.guild;
+            const inactiveRole = guild.roles.cache.get(roleIdToRemove);
+            filteredUsers = filteredUsers.filter(u => {
+              const memberCheck = guild.members.cache.get(u.userID);
+              return memberCheck && inactiveRole && memberCheck.roles.cache.has(inactiveRole.id);
+            });
+            page = 1;
+            await i.update(await updatePage(page, filteredUsers));
           }
-        } else if (i.customId === 'incative_inactiveSort') {
-          await i.deferUpdate();
-          const guild = i.guild;
-          const inactiveRole = guild.roles.cache.get(roleIdToRemove);
-          filteredUsers = filteredUsers.filter(u => {
-            const memberCheck = guild.members.cache.get(u.userID);
-            return memberCheck && inactiveRole && memberCheck.roles.cache.has(inactiveRole.id);
-          });
-          page = 1;
-          await i.editReply(await updatePage(page, filteredUsers));
+        } catch (error) {
+          console.error('Error in interaction collector:', error);
         }
       });
 

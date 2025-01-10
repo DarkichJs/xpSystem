@@ -8,7 +8,7 @@ const osu = require('node-os-utils');
 const cron = require('node-cron');
 const User = require('../../Schema/user.js');
 const ResetTime = require('../../Schema/resetTime.js');
-
+const config = require('../../config.json');
 module.exports = (client) => {
 
   let cpu = osu.cpu;

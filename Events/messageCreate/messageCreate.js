@@ -22,14 +22,12 @@ module.exports = async (client, message) => {
             messages: 1,
             xp: 0,
             lvl: 0,
-            threedays: 1
+            inactive: 1
         });
     } else {
         user.messages += 1;
-        user.threedays = (user.threedays || 0) + 1;
+        user.inactive = (user.inactive || 0) + 1;
     }
-
-    if (!config.xpsystem) return; 
 
     function getXpForNextLevel(level) {
         return 100 + (level - 1) * 50;
