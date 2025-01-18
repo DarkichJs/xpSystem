@@ -57,7 +57,6 @@ module.exports = {
           embed.setDescription(
             pageUsers.map((u, i) => {
               const position = startIndex + i + 1;
-              console.log(u.inactive)
               return `${position}. <@${u.userID}> - **Messages (inactive):** ${u.inactive || 0}`;
             }).join('\n')
           );
@@ -112,33 +111,57 @@ module.exports = {
             return i.reply({ content: 'This is not for you.', ephemeral: true });
           }
 
-          if (i.customId === 'incative_prev') {
-            page = Math.max(1, page - 1);
-            await i.update(await updatePage(page));
-          } else if (i.customId === 'incative_next') {
-            page = Math.min(Math.ceil(filteredUsers.length / itemsPerPage), page + 1);
-            await i.update(await updatePage(page));
-          } else if (i.customId === 'incative_resetAll') {
-            const guild = interaction.guild;
-            const roleToRemove = guild.roles.cache.get(roleIdToRemove);
-            if (roleToRemove) {
-              const membersWithRole = roleToRemove.members;
-              for (const member of membersWithRole.values()) {
-                await member.roles.remove(roleToRemove).catch(() => null);
+          // Create a function to handle the response safely
+          const handleResponse = async (action) => {
+            try {
+              await i.deferUpdate();
+              await action();
+            } catch (err) {
+              if (err.code === 40060) {
+                // Interaction already acknowledged, try to edit the reply directly
+                await action();
+              } else if (err.code === 10062) {
+                // Unknown interaction, do nothing
+                console.log('Interaction expired');
+              } else {
+                throw err;
               }
-              await User.updateMany({}, { $set: { inactive: 0 } });
             }
+          };
 
-            let resetDoc = await ResetTime.findOne({});
-            if (!resetDoc) {
-              resetDoc = new ResetTime({ lastResetTime: Date.now().toString() });
-            } else {
-              resetDoc.lastResetTime = Date.now().toString();
-            }
-            await resetDoc.save();
+          if (i.customId === 'incative_prev') {
+            await handleResponse(async () => {
+              page = Math.max(1, page - 1);
+              await i.editReply(await updatePage(page));
+            });
+          } else if (i.customId === 'incative_next') {
+            await handleResponse(async () => {
+              page = Math.min(Math.ceil(filteredUsers.length / itemsPerPage), page + 1);
+              await i.editReply(await updatePage(page));
+            });
+          } else if (i.customId === 'incative_resetAll') {
+            await handleResponse(async () => {
+              const guild = interaction.guild;
+              const roleToRemove = guild.roles.cache.get(roleIdToRemove);
+              if (roleToRemove) {
+                const membersWithRole = roleToRemove.members;
+                for (const member of membersWithRole.values()) {
+                  await member.roles.remove(roleToRemove).catch(() => null);
+                }
+                await User.updateMany({}, { $set: { inactive: 0 } });
+              }
 
-            collector.stop();
-            await i.update({ content: 'Role removed from all, `inactive` reset, and new cycle started.', embeds: [], components: [] });
+              let resetDoc = await ResetTime.findOne({});
+              if (!resetDoc) {
+                resetDoc = new ResetTime({ lastResetTime: Date.now().toString() });
+              } else {
+                resetDoc.lastResetTime = Date.now().toString();
+              }
+              await resetDoc.save();
+
+              collector.stop();
+              await i.editReply({ content: 'Role removed from all, `inactive` reset, and new cycle started.', embeds: [], components: [] });
+            });
           } else if (i.customId === 'incative_reissueRole') {
             const guild = interaction.guild;
             const inactiveRole = guild.roles.cache.get(roleIdToRemove);
@@ -176,27 +199,38 @@ module.exports = {
               }
             }
 
-            await i.update({ content: 'Role reissue complete', embeds: [], components: [] });
+            await i.editReply({ content: 'Role reissue complete', embeds: [], components: [] });
             collector.stop();
           } else if (i.customId === 'incative_inactiveSort') {
-            const guild = i.guild;
-            const inactiveRole = guild.roles.cache.get(roleIdToRemove);
-            filteredUsers = filteredUsers.filter(u => {
-              const memberCheck = guild.members.cache.get(u.userID);
-              return memberCheck && inactiveRole && memberCheck.roles.cache.has(inactiveRole.id);
+            await handleResponse(async () => {
+              const guild = i.guild;
+              const inactiveRole = guild.roles.cache.get(roleIdToRemove);
+              filteredUsers = filteredUsers.filter(u => {
+                const memberCheck = guild.members.cache.get(u.userID);
+                return memberCheck && inactiveRole && memberCheck.roles.cache.has(inactiveRole.id);
+              });
+              page = 1;
+              await i.editReply(await updatePage(page, filteredUsers));
             });
-            page = 1;
-            await i.update(await updatePage(page, filteredUsers));
           }
         } catch (error) {
           console.error('Error in interaction collector:', error);
+          // Only log non-interaction errors
+          if (error.code !== 10062 && error.code !== 40060) {
+            console.error(error);
+          }
         }
       });
 
       collector.on('end', async () => {
         try {
-          await interaction.editReply({ components: [] });
-        } catch {}
+          const message = await interaction.fetchReply();
+          if (message) {
+            await interaction.editReply({ components: [] }).catch(() => {});
+          }
+        } catch (err) {
+          console.log('Failed to remove components on collector end');
+        }
       });
     } catch (error) {
       console.error('Error in incative command:', error);
