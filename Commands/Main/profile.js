@@ -30,39 +30,40 @@ module.exports = {
         });
       }
 
-      function getXpForNextLevel(level) {
-        return 100 + (level - 1) * 50;
-      }
-
-      function generateLevelBar(xp, level) {
-        const totalBars = 20;
-        const xpForNextLevel = getXpForNextLevel(level) || 1;
-        const progress = xp / xpForNextLevel;
-        const filledBars = Math.round(Math.min(progress, 1) * totalBars);
-        const emptyBars = totalBars - filledBars;
-        return `${"■".repeat(filledBars)}${"□".repeat(emptyBars)}`;
-      }
-
-      const levelBar = generateLevelBar(user_find.xp, user_find.lvl);
-      const xpForNextLevel = getXpForNextLevel(user_find.lvl);
-      const xpPerMessage = 7;
-      const messagesToNextLevel = Math.ceil(
-        (xpForNextLevel - user_find.xp) / xpPerMessage
-      );
-
       const embed = new EmbedBuilder()
         .setAuthor({
           name: `Profile - ${user.tag}`,
           iconURL: config.icons.profile
         })
-        .setDescription(`
+        .setColor("#303136")
+        .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+
+      if (config.xpsystem) {
+        function getXpForNextLevel(level) {
+          return 100 + (level - 1) * 50;
+        }
+
+        function generateLevelBar(xp, level) {
+          const totalBars = 20;
+          const xpForNextLevel = getXpForNextLevel(level) || 1;
+          const progress = xp / xpForNextLevel;
+          const filledBars = Math.round(Math.min(progress, 1) * totalBars);
+          const emptyBars = totalBars - filledBars;
+          return `${"■".repeat(filledBars)}${"□".repeat(emptyBars)}`;
+        }
+
+        const levelBar = generateLevelBar(user_find.xp, user_find.lvl);
+        embed.setDescription(`
           \`\`\`・Messages: ${user_find.messages}\`\`\`
           \`\`\`・XP: ${user_find.xp}\`\`\`
           \`\`\`・Level: ${user_find.lvl}\`\`\`
           \`\`\`${levelBar}\`\`\`
-        `)
-        .setColor("#303136")
-        .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+        `);
+      } else {
+        embed.setDescription(`
+          \`\`\`・Messages: ${user_find.messages}\`\`\`
+        `);
+      }
 
       interaction.reply({ embeds: [embed] });
     } catch (error) {
