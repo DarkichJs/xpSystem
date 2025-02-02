@@ -9,6 +9,8 @@ const cron = require('node-cron');
 const User = require('../../Schema/user.js');
 const ResetTime = require('../../Schema/resetTime.js');
 const config = require('../../config.json');
+const { logError } = require('../../utils/logger');
+
 module.exports = (client) => {
 
   let cpu = osu.cpu;
@@ -17,11 +19,12 @@ module.exports = (client) => {
     console.log(chalk.bgBlue("--------------------------------------------"));
     console.log(chalk.bgRed("SYSTEM DEVELOPED BY darkich"));
     console.log(chalk.bgBlue("--------------------------------------------"));
-  });
+  }).catch(error => logError(error, 'CPU Usage Check Error'));
 
   console.log(chalk.green(`・ Bot name:`), chalk.red(`${client.user.tag}`));
   client.guilds.cache.forEach((guild) => {
-    client.application.commands.set(commands, guild.id).catch((err) => console.log(err));
+    client.application.commands.set(commands, guild.id)
+      .catch((err) => logError(err, `Failed to set commands for guild ${guild.id}`));
     client.guildConfigs = new Collection();
   });
 
@@ -86,7 +89,7 @@ module.exports = (client) => {
         await resetDoc.save();
       }
     } catch (error) {
-      console.error('Error in message check cron job:', error);
+      logError(error, 'Error in message check cron job');
     }
   });
 };
