@@ -41,23 +41,25 @@ module.exports = async (client, message) => {
         user.lvl += 1;
         xpForNextLevel = getXpForNextLevel(user.lvl);
 
-        const levelUpEmbed = new EmbedBuilder()
-            .setAuthor({name: `LEVEL UP - ${message.author.username}`, iconURL: config.icons.levelUp})
-            .setDescription(`**${message.author}, you leveled up to level \`${user.lvl}\`!**`)
-            .setColor("#303136")
-            .setThumbnail(message.author.displayAvatarURL({ dynamic: true }));
+        if (config.xpsystem) {
+            const levelUpEmbed = new EmbedBuilder()
+                .setAuthor({name: `LEVEL UP - ${message.author.username}`, iconURL: config.icons.levelUp})
+                .setDescription(`**${message.author}, you leveled up to level \`${user.lvl}\`!**`)
+                .setColor("#303136")
+                .setThumbnail(message.author.displayAvatarURL({ dynamic: true }));
 
-        const levelUpChannelId = config.levelupchannel;
-        const levelUpChannel = message.guild.channels.cache.get(levelUpChannelId);
+            const levelUpChannelId = config.levelupchannel;
+            const levelUpChannel = message.guild.channels.cache.get(levelUpChannelId);
 
-        if (levelUpChannel) {
-            levelUpChannel.send({ embeds: [levelUpEmbed] }).catch(error => {
-                if (error.code !== 50013) {
-                    console.error('Failed to send level up message:', error);
-                }
-            });
-        } else {
-            console.error('Level up channel not found.');
+            if (levelUpChannel) {
+                levelUpChannel.send({ embeds: [levelUpEmbed] }).catch(error => {
+                    if (error.code !== 50013) {
+                        console.error('Failed to send level up message:', error);
+                    }
+                });
+            } else {
+                console.error('Level up channel not found.');
+            }
         }
 
         const roles = config.roles;
