@@ -4,6 +4,7 @@ let config = require("./config.json");
 const mongoose = require("mongoose");
 let mongoUrl = config.mongo;
 let token = config.token;
+const { logger } = require('./utils/logger');
 
 const {
   Client,
